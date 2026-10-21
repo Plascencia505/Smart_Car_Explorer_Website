@@ -1,7 +1,16 @@
 // src/config/mqtt.js
-import { Aedes } from 'aedes';
+import mqtt from "mqtt";
 
-// Creación asíncrona del broker MQTT embebido según la API moderna de Aedes
-const aedes = await Aedes.createBroker();
+const brokerUrl = process.env.HIVEMQ_URL || "mqtt://broker.hivemq.com:1883";
 
-export default aedes;
+const mqttClient = mqtt.connect(brokerUrl);
+
+mqttClient.on("connect", () => {
+  console.log(`[MQTT] Conectado exitosamente al broker público (${brokerUrl})`);
+});
+
+mqttClient.on("error", (err) => {
+  console.error("[MQTT] Error de conexión:", err.message);
+});
+
+export default mqttClient;

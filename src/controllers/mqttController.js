@@ -1,59 +1,40 @@
 // src/controllers/mqttController.js
 import Telemetry from "../models/Telemetry.js";
 
-const TOPIC = "SCEB/7B/telemetry"
+export const setupMqttController = (mqttClient, io) => {
+  const prefix = process.env.MQTT_TOPIC_PREFIX || "SCEB_LMJAPFMCSS/7B";
+  const telemetryTopic = `${prefix}/telemetry`;
 
-export const setupMqttController = (aedes, io) => {
-  // Registro de conexiones para depuración
-  aedes.on("client", (client) => {
-    console.log(`Cliente conectado: ${client ? client.id : "desconocido"}`);
+  mqttClient.subscribe(telemetryTopic, (err) => {
+    if (err) {
+      console.error(`Error al suscribirse a ${telemetryTopic}:`, err.message);
+    } else {
+      console.log(`Escuchando telemetría en: ${telemetryTopic}`);
+    }
   });
 
-  aedes.on("clientDisconnect", (client) => {
-    console.log(`Cliente desconectado: ${client ? client.id : "desconocido"}`);
-  });
-
-  // Intercepción de mensajes entrantes
-  aedes.on("publish", async (packet, client) => {
-    // Ignorar mensajes internos del broker (donde client es nulo)
-    if (!client) return;
-
-    const topic = packet.topic;
-    const payload = packet.payload.toString();
-
-    // Tópico acordado para la recepción de datos del hardware
-    if (topic === TOPIC) {
+  mqttClient.on("message", async (topic, message) => {
+    if (topic === telemetryTopic) {
       try {
-        const data = JSON.parse(payload);
+        const data = JSON.parse(message.toString());
 
-        // Validación del contrato de datos de LoRa
         if (
           data.la !== undefined &&
           data.lo !== undefined &&
           data.t !== undefined &&
           data.p !== undefined
         ) {
-          // Mapeo hacia el modelo de Mongoose
           const newTelemetry = new Telemetry({
-            location: {
-              type: "Point",
-              coordinates: [data.lo, data.la], // GeoJSON requiere [longitud, latitud]
-            },
+            location: { type: "Point", coordinates: [data.lo, data.la] },
             temperature: data.t,
             pressure: data.p,
           });
 
           const savedTelemetry = await newTelemetry.save();
-
-          // Emisión inmediata al frontend a través de WebSockets
-          if (io) {
-            io.emit("new_telemetry", savedTelemetry);
-          }
-        } else {
-          console.warn("Payload rechazado por formato incompleto:", payload);
+          if (io) io.emit("new_telemetry", savedTelemetry);
         }
       } catch (error) {
-        console.error("Error al procesar la telemetría:", error.message);
+        console.error("Error al procesar telemetría:", error.message);
       }
     }
   });
