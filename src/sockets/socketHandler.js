@@ -5,7 +5,7 @@ export const setupSocketHandler = (io, mqttClient) => {
   const navigateTopic = `${prefix}/navigate`;
 
   io.on("connection", (socket) => {
-    console.log(`[WS] Dashboard conectado: ${socket.id}`);
+    console.log(`Dashboard conectado: ${socket.id}`);
 
     // Comandos de marcha manual (W, A, S, D, STOP)
     socket.on("manual_control", (commandData) => {
@@ -20,7 +20,7 @@ export const setupSocketHandler = (io, mqttClient) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(`[WS] Dashboard desconectado: ${socket.id}`);
+      console.log(`Dashboard desconectado: ${socket.id}`);
     });
   });
 };
