@@ -26,8 +26,23 @@ const sanitizeValue = (value) => {
 };
 
 export const xssSanitize = (req, res, next) => {
-  if (req.body) req.body = sanitizeValue(req.body);
-  if (req.query) req.query = sanitizeValue(req.query);
-  if (req.params) req.params = sanitizeValue(req.params);
+  // express.json() permite reasignar req.body por completo sin problema
+  if (req.body) {
+    req.body = sanitizeValue(req.body);
+  }
+
+  // req.query y req.params son getters en Express 5, mutamos sus propiedades individualmente
+  if (req.query) {
+    for (const key in req.query) {
+      req.query[key] = sanitizeValue(req.query[key]);
+    }
+  }
+
+  if (req.params) {
+    for (const key in req.params) {
+      req.params[key] = sanitizeValue(req.params[key]);
+    }
+  }
+
   next();
 };
