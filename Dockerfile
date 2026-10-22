@@ -13,7 +13,7 @@ RUN npm install --omit=dev
 # Copiar el resto del código fuente al contenedor
 COPY . .
 
-# Exponer el puerto HTTP (Express + WebSockets) y el puerto TCP (MQTT)
+# Exponer el puerto HTTP (Express + WebSockets)
 EXPOSE 3000
 
 # Comando de arranque apuntando a tu orquestador principal
