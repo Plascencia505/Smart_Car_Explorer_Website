@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # Comando de arranque apuntando a tu orquestador principal
-CMD ["node", "src/index.js"]
+CMD ["npm", "start"]

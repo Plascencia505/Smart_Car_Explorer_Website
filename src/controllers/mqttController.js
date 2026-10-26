@@ -29,6 +29,9 @@ export const setupMqttController = (mqttClient, io) => {
             temperature: data.t,
             pressure: data.p,
           });
+          
+          // Salida en consola durante desarrollo
+          console.log(newTelemetry);
 
           const savedTelemetry = await newTelemetry.save();
           if (io) io.emit("new_telemetry", savedTelemetry);
