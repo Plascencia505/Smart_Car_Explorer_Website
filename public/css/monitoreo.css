@@ -1,0 +1,104 @@
+/* ===== Smart Car Explorer · Estilos de "Monitoreo" =====
+   Requiere css/paneles.css (paneles, secciones y gráficas). */
+
+:root {
+  --color-presion: #3b6fd8;
+  --color-temperatura: #d9483b;
+}
+
+/* El selector "Graficar" va a la izquierda, como en el boceto */
+.grafica-acciones { justify-content: flex-start; }
+
+/* Título de sección con controles a la derecha */
+.seccion-encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-bottom: 16px;
+}
+.seccion-encabezado .seccion-titulo { margin-bottom: 0; }
+
+/* ---------- Mapa ---------- */
+.panel-mapa { overflow: hidden; }
+
+#mapa {
+  height: 460px;
+  width: 100%;
+  background: #dfe3e8;
+}
+
+.mapa-controles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-mapa {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  font: inherit;
+  font-weight: 600;
+  font-size: .92rem;
+  color: var(--panel-texto);
+  background: #fff;
+  border: 1px solid var(--panel-borde);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.btn-mapa svg { width: 18px; height: 18px; }
+.btn-mapa:hover { background: var(--acento); color: #fff; border-color: var(--acento); }
+
+/* Datos debajo del mapa */
+.mapa-datos {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-top: 1px solid var(--panel-borde);
+}
+.mapa-datos div {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 18px;
+  border-right: 1px solid var(--panel-borde);
+  min-width: 0;
+}
+.mapa-datos div:last-child { border-right: none; }
+.mapa-datos span {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--panel-suave);
+}
+.mapa-datos strong {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.marcador-inicio {
+  width: 14px; height: 14px;
+  background: #fff;
+  border: 3px solid #555;
+  border-radius: 50%;
+}
+
+/* Ventana emergente del robot */
+.popup-robot { font-family: "Inter", system-ui, sans-serif; font-size: .85rem; line-height: 1.6; }
+.popup-robot strong { display: block; font-size: .95rem; margin-bottom: 4px; }
+
+/* ---------- Móvil ---------- */
+@media (max-width: 860px) {
+  .mapa-datos { grid-template-columns: repeat(2, 1fr); }
+  .mapa-datos div { border-bottom: 1px solid var(--panel-borde); }
+  .mapa-datos div:nth-child(2n) { border-right: none; }
+  .mapa-datos div:last-child { grid-column: 1 / -1; border-bottom: none; }
+}
+@media (max-width: 760px) {
+  #mapa { height: 360px; }
+  .mapa-controles { width: 100%; }
+  .interruptor, .btn-mapa { flex: 1 1 auto; justify-content: center; }
+}

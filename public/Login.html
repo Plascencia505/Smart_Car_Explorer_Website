@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Si ya hay sesión iniciada, login.js manda directo al sitio -->
+  <script src="/js/config.js"></script>
+  <script src="/js/sesion.js"></script>
+  <title>Iniciar sesión | Smart Car Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+<body data-seccion="login">
+  <div class="fondo"></div>
+  <div class="fondo-oscuro"></div>
+
+  <main class="login">
+
+    <!-- ================= TÍTULO E IMAGEN DEL ROBOT ================= -->
+    <section class="presentacion-login">
+      <!-- Título con fondo degradado (se cambia en css/login.css → --degradado-titulo) -->
+      <div class="banner-titulo">
+        <h1 class="titulo-login">Smart Car Explorer</h1>
+        <p class="subtitulo-login">Robot autónomo con ESP32, LoRa y GPS</p>
+      </div>
+
+      <div class="tarjeta-robot">
+        <!-- Ilustración del carro robot.
+             Para usar una foto, reemplaza todo este <svg> por:
+             <img src="URL-de-la-imagen" alt="Carro robot Smart Car Explorer"> -->
+        <svg class="ilustracion-robot" viewBox="0 0 420 300" role="img" aria-label="Ilustración de un carro robot">
+          <!-- Sombra -->
+          <ellipse cx="210" cy="254" rx="165" ry="12" class="sombra"/>
+          <!-- Antena LoRa -->
+          <rect x="268" y="52" width="6" height="66" rx="3" class="antena"/>
+          <circle cx="271" cy="50" r="8" class="antena-punta"/>
+          <!-- Módulo GPS -->
+          <rect x="130" y="96" width="56" height="22" rx="4" class="gps"/>
+          <rect x="140" y="102" width="36" height="10" rx="2" class="gps-chip"/>
+          <!-- Placa superior -->
+          <rect x="70" y="116" width="270" height="18" rx="9" class="placa-sup"/>
+          <!-- Separadores -->
+          <rect x="96" y="134" width="8" height="34" class="poste"/>
+          <rect x="306" y="134" width="8" height="34" class="poste"/>
+          <!-- Tarjeta ESP32 entre placas -->
+          <rect x="140" y="140" width="110" height="24" rx="3" class="tarjeta"/>
+          <rect x="186" y="145" width="26" height="14" rx="2" class="chip"/>
+          <!-- Placa inferior / chasis -->
+          <rect x="50" y="166" width="310" height="30" rx="12" class="placa-inf"/>
+          <!-- Sensor ultrasónico (frente) -->
+          <rect x="350" y="150" width="22" height="58" rx="4" class="sensor"/>
+          <circle cx="372" cy="166" r="11" class="sensor-ojo"/>
+          <circle cx="372" cy="192" r="11" class="sensor-ojo"/>
+          <!-- Ruedas -->
+          <circle cx="112" cy="214" r="38" class="llanta"/>
+          <circle cx="112" cy="214" r="18" class="rin"/>
+          <circle cx="300" cy="214" r="38" class="llanta"/>
+          <circle cx="300" cy="214" r="18" class="rin"/>
+          <!-- Señal inalámbrica -->
+          <path d="M290 34 a26 26 0 0 1 0 32" class="senal"/>
+          <path d="M300 24 a40 40 0 0 1 0 52" class="senal"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ================= FORMULARIO DE INICIO DE SESIÓN ================= -->
+    <section class="tarjeta-login">
+      <div class="login-encabezado">
+        <span class="login-icono">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+          </svg>
+        </span>
+        <h2>Iniciar sesión</h2>
+        <p>Ingresa con tu cuenta para acceder al panel del robot.</p>
+      </div>
+
+      <form id="formLogin" novalidate>
+        <label class="campo">
+          <span>Usuario</span>
+          <div class="entrada">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>
+            </svg>
+            <input type="text" id="usuario" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Escribe tu usuario" required>
+          </div>
+        </label>
+
+        <label class="campo">
+          <span>Contraseña</span>
+          <div class="entrada">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+            </svg>
+            <input type="password" id="contrasena" name="contrasena" autocomplete="current-password" placeholder="Escribe tu contraseña" required>
+            <button type="button" class="btn-ver" id="btnVer" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <small class="aviso-mayus" id="avisoMayus" hidden>Bloq Mayús está activado</small>
+        </label>
+
+
+        <div class="error-login" id="errorLogin" role="alert" hidden></div>
+
+        <button type="submit" class="btn-ingresar" id="btnIngresar">
+          <span class="giro-boton" aria-hidden="true"></span>
+          <span class="texto-boton">Ingresar</span>
+        </button>
+      </form>
+
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>
