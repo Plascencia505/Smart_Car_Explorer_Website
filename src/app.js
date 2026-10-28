@@ -32,7 +32,7 @@ app.use(xssSanitize);
 // 10 días de expiración para la sesión
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "clave_secreta_por_defecto",
+    secret: process.env.SESSION_SECRET || "250ef31f54d7cc16c8bf94f9d46421a91e78426f3d5889f17ec01384140142d1",
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
