@@ -12,11 +12,11 @@ const $ = (id) => document.getElementById(id);
    1. REGISTROS (del más antiguo al más reciente)
 ------------------------------------------------------------------ */
 let registros = [];
-let estadoCarga = "cargando";   // "cargando" | "listo" | "error"
+let estadoCarga = "cargando"; // "cargando" | "listo" | "error"
 let mensajeError = "";
 
 function agregarRegistro(r) {
-  if (registros.some((x) => x.id === r.id)) return false;   // evita duplicados
+  if (registros.some((x) => x.id === r.id)) return false; // evita duplicados
   registros.push(r);
   return true;
 }
@@ -25,7 +25,9 @@ async function cargarRegistros() {
   estadoCarga = "cargando";
   actualizarTabla();
   try {
-    const lista = await api.registros({ limite: CONFIG.LIMITE_REGISTROS_TABLA });
+    const lista = await api.registros({
+      limite: CONFIG.LIMITE_REGISTROS_TABLA,
+    });
     // Puede haber llegado alguno por tiempo real mientras se cargaba
     const nuevos = registros;
     registros = lista.reverse();
@@ -86,9 +88,11 @@ function buscar(consulta, lista = registros, limite = MAX_FILAS) {
     for (const p of palabras) {
       let mejor = 0;
       for (const c of campos) {
-        if (c === p) mejor = Math.max(mejor, 3);              // coincidencia exacta
-        else if (c.startsWith(p)) mejor = Math.max(mejor, 2); // empieza igual
-        else if (c.includes(p)) mejor = Math.max(mejor, 1);   // la contiene
+        if (c === p)
+          mejor = Math.max(mejor, 3); // coincidencia exacta
+        else if (c.startsWith(p))
+          mejor = Math.max(mejor, 2); // empieza igual
+        else if (c.includes(p)) mejor = Math.max(mejor, 1); // la contiene
       }
       puntos += mejor;
     }
@@ -113,7 +117,7 @@ function actualizarTabla() {
   }
   if (estadoCarga === "error" && registros.length === 0) {
     cuerpoTabla.innerHTML = filaMensaje(
-      `No se pudieron cargar los registros. ${mensajeError}<br><button type="button" class="btn-reintentar" id="btnReintentar">Reintentar</button>`
+      `No se pudieron cargar los registros. ${mensajeError}<br><button type="button" class="btn-reintentar" id="btnReintentar">Reintentar</button>`,
     );
     $("btnReintentar").addEventListener("click", cargarRegistros);
     tablaInfo.textContent = "";
@@ -124,15 +128,20 @@ function actualizarTabla() {
   const filas = consulta ? buscar(consulta) : recientes(registros);
 
   if (filas.length === 0) {
-    cuerpoTabla.innerHTML = filaMensaje(consulta ? "No se encontraron registros" : "Aún no hay registros guardados.");
+    cuerpoTabla.innerHTML = filaMensaje(
+      consulta
+        ? "No se encontraron registros"
+        : "Aún no hay registros guardados.",
+    );
     tablaInfo.textContent = "";
     return;
   }
 
   // El ID no se muestra, pero se guarda en el botón para saber qué registro borrar
-  cuerpoTabla.innerHTML = filas.map((r) => {
-    const v = camposVisibles(r);
-    return `
+  cuerpoTabla.innerHTML = filas
+    .map((r) => {
+      const v = camposVisibles(r);
+      return `
     <tr>
       <td class="num">${v.fecha}</td>
       <td class="num">${v.hora}</td>
@@ -147,11 +156,14 @@ function actualizarTabla() {
         </div>
       </td>
     </tr>`;
-  }).join("");
+    })
+    .join("");
 
   const total = registros.length;
-  const alcance = CONFIG.LIMITE_REGISTROS_TABLA > 0 && total >= CONFIG.LIMITE_REGISTROS_TABLA
-    ? ` (se buscan los ${total} más recientes)` : "";
+  const alcance =
+    CONFIG.LIMITE_REGISTROS_TABLA > 0 && total >= CONFIG.LIMITE_REGISTROS_TABLA
+      ? ` (se buscan los ${total} más recientes)`
+      : "";
   tablaInfo.textContent = consulta
     ? `Mostrando ${filas.length} registro(s) con más coincidencias para "${consulta}"${alcance}.`
     : `Mostrando los ${filas.length} registros más recientes de ${total}${alcance ? " cargados" : ""}.`;
@@ -165,7 +177,13 @@ cuerpoTabla.addEventListener("click", async (e) => {
   if (!boton || !esAdmin()) return;
   const id = boton.dataset.id;
   const r = registros.find((x) => x.id === id);
-  if (!r || !confirm(`¿Seguro que deseas borrar el registro del ${r.fecha} a las ${r.hora}?`)) return;
+
+  if (!r) return;
+  const seguro = await confirmarSwal(
+    `Se eliminará el registro del ${r.fecha} a las ${r.hora}.`,
+    "¿Borrar registro?",
+  );
+  if (!seguro) return;
 
   boton.disabled = true;
   try {
@@ -173,11 +191,16 @@ cuerpoTabla.addEventListener("click", async (e) => {
     registros = registros.filter((x) => x.id !== id);
     actualizarTabla();
     graficaAltura.recargar();
+    Toast.fire({ icon: "success", title: "Registro borrado correctamente" });
   } catch (err) {
     boton.disabled = false;
-    alert(err.estado === 403
-      ? "Tu cuenta no tiene permisos para borrar registros."
-      : `No se pudo borrar el registro. ${err.message}`);
+    await alertaSwal(
+      err.estado === 403
+        ? "Tu cuenta no tiene permisos para borrar registros."
+        : `No se pudo borrar el registro. ${err.message}`,
+      "error",
+      "Acceso denegado",
+    );
   }
 });
 
@@ -187,14 +210,14 @@ cuerpoTabla.addEventListener("click", async (e) => {
    búsqueda escrita, se exportan todos los que coinciden.
 ------------------------------------------------------------------ */
 const COLUMNAS_EXPORTAR = [
-  { campo: "id",          titulo: "ID" },
-  { campo: "fecha",       titulo: "Fecha" },
-  { campo: "hora",        titulo: "Hora" },
-  { campo: "latitud",     titulo: "Latitud" },
-  { campo: "longitud",    titulo: "Longitud" },
+  { campo: "id", titulo: "ID" },
+  { campo: "fecha", titulo: "Fecha" },
+  { campo: "hora", titulo: "Hora" },
+  { campo: "latitud", titulo: "Latitud" },
+  { campo: "longitud", titulo: "Longitud" },
   { campo: "temperatura", titulo: "Temperatura (°C)" },
-  { campo: "presion",     titulo: "Presión (hPa)" },
-  { campo: "altura",      titulo: "Altura calculada (m)" },
+  { campo: "presion", titulo: "Presión (hPa)" },
+  { campo: "altura", titulo: "Altura calculada (m)" },
 ];
 
 // Encierra en comillas los valores con comas, comillas o saltos de línea
@@ -206,7 +229,7 @@ function celdaCSV(valor) {
 function generarCSV(lista) {
   const encabezado = COLUMNAS_EXPORTAR.map((c) => celdaCSV(c.titulo)).join(",");
   const filas = lista.map((r) => {
-    const v = { ...r, ...camposVisibles(r) };   // mismos decimales que la tabla
+    const v = { ...r, ...camposVisibles(r) }; // mismos decimales que la tabla
     return COLUMNAS_EXPORTAR.map((c) => celdaCSV(v[c.campo])).join(",");
   });
   // "﻿" (BOM) hace que Excel reconozca los acentos (UTF-8)
@@ -215,20 +238,29 @@ function generarCSV(lista) {
 
 function generarJSON(lista) {
   // Mismo formato que acepta la gráfica "Altura de registros" ({ registros: [...] })
-  return JSON.stringify({
-    proyecto: "Smart Car Explorer",
-    exportado: new Date().toISOString(),
-    busqueda: inputBusqueda.value.trim() || null,
-    total: lista.length,
-    registros: lista.map((r) => {
-      const v = camposVisibles(r);
-      return {
-        id: r.id, fecha: r.fecha, hora: r.hora,
-        latitud: r.latitud, longitud: r.longitud,
-        temperatura: +v.temperatura, presion: +v.presion, altura: +v.altura,
-      };
-    }),
-  }, null, 2);
+  return JSON.stringify(
+    {
+      proyecto: "Smart Car Explorer",
+      exportado: new Date().toISOString(),
+      busqueda: inputBusqueda.value.trim() || null,
+      total: lista.length,
+      registros: lista.map((r) => {
+        const v = camposVisibles(r);
+        return {
+          id: r.id,
+          fecha: r.fecha,
+          hora: r.hora,
+          latitud: r.latitud,
+          longitud: r.longitud,
+          temperatura: +v.temperatura,
+          presion: +v.presion,
+          altura: +v.altura,
+        };
+      }),
+    },
+    null,
+    2,
+  );
 }
 
 function descargarArchivo(contenido, nombre, tipo) {
@@ -254,23 +286,51 @@ const botonesExportar = [...document.querySelectorAll(".btn-exportar")];
 
 async function exportar(formato, boton) {
   const textoOriginal = boton.textContent;
-  botonesExportar.forEach((b) => { b.disabled = true; });
+  botonesExportar.forEach((b) => {
+    b.disabled = true;
+  });
   boton.textContent = "…";
   try {
-    const todos = await api.registros({ limite: 0 });   // del más reciente al más antiguo
+    const todos = await api.registros({ limite: 0 });
     const consulta = inputBusqueda.value.trim();
     const lista = consulta ? buscar(consulta, todos, Infinity) : todos;
     if (lista.length === 0) {
-      alert(consulta ? "No hay registros que coincidan con la búsqueda." : "Aún no hay registros para exportar.");
+      await alertaSwal(
+        consulta
+          ? "No hay registros que coincidan con la búsqueda."
+          : "Aún no hay registros para exportar.",
+        "warning",
+        "Sin datos",
+      );
       return;
     }
-    if (formato === "csv") descargarArchivo(generarCSV(lista), nombreDescarga("csv"), "text/csv;charset=utf-8");
-    else descargarArchivo(generarJSON(lista), nombreDescarga("json"), "application/json");
+    if (formato === "csv")
+      descargarArchivo(
+        generarCSV(lista),
+        nombreDescarga("csv"),
+        "text/csv;charset=utf-8",
+      );
+    else
+      descargarArchivo(
+        generarJSON(lista),
+        nombreDescarga("json"),
+        "application/json",
+      );
+    Toast.fire({
+      icon: "success",
+      title: `Archivo ${formato.toUpperCase()} descargado`,
+    });
   } catch (err) {
-    alert(`No se pudieron exportar los registros. ${err.message}`);
+    await alertaSwal(
+      `No se pudieron exportar los registros. ${err.message}`,
+      "error",
+      "Error de exportación",
+    );
   } finally {
     boton.textContent = textoOriginal;
-    botonesExportar.forEach((b) => { b.disabled = false; });
+    botonesExportar.forEach((b) => {
+      b.disabled = false;
+    });
   }
 }
 
@@ -305,7 +365,8 @@ conectarTiempoReal({
     actualizarTabla();
     graficaAltura.recibir(registro);
   },
-  alCambiarConexion: (conectado) => pintarConexion($("estadoConexion"), conectado),
+  alCambiarConexion: (conectado) =>
+    pintarConexion($("estadoConexion"), conectado),
 });
 
 cargarRegistros();
@@ -324,7 +385,8 @@ const graficaArchivo = new Chart($("graficaArchivo"), {
   data: { labels: [], datasets: [datasetLinea()] },
   options: opcionesGrafica("Registro", "Altura (m)"),
 });
-graficaArchivo.options.plugins.tooltip.callbacks.label = (c) => `Altura: ${c.parsed.y.toFixed(1)} m`;
+graficaArchivo.options.plugins.tooltip.callbacks.label = (c) =>
+  `Altura: ${c.parsed.y.toFixed(1)} m`;
 
 const inputArchivo = $("archivoJSON");
 const nombreArchivo = $("nombreArchivo");
@@ -338,18 +400,29 @@ inputArchivo.addEventListener("change", () => {
   lector.onload = () => {
     try {
       const puntos = leerAlturas(JSON.parse(lector.result));
-      if (puntos.length === 0) throw new Error("El archivo no contiene valores de altura ni de presión.");
+      if (puntos.length === 0)
+        throw new Error(
+          "El archivo no contiene valores de altura ni de presión.",
+        );
 
       graficaArchivo.data.labels = puntos.map((p) => p.etiqueta);
-      graficaArchivo.data.datasets[0].data = puntos.map((p) => +p.altura.toFixed(2));
-      graficaArchivo.options.scales.x.title.text = puntos[0].esHora ? "Hora" : "Registro";
+      graficaArchivo.data.datasets[0].data = puntos.map(
+        (p) => +p.altura.toFixed(2),
+      );
+      graficaArchivo.options.scales.x.title.text = puntos[0].esHora
+        ? "Hora"
+        : "Registro";
       graficaArchivo.update();
 
       nombreArchivo.textContent = `${archivo.name} · ${puntos.length} registros`;
       graficaVacia.hidden = true;
       graficaVacia.classList.remove("error");
     } catch (err) {
-      mostrarErrorArchivo(err.message.startsWith("El archivo") ? err.message : "El archivo no es un JSON válido.");
+      mostrarErrorArchivo(
+        err.message.startsWith("El archivo")
+          ? err.message
+          : "El archivo no es un JSON válido.",
+      );
     }
     inputArchivo.value = ""; // permite volver a cargar el mismo archivo
   };
@@ -361,7 +434,9 @@ function etiquetaHora(item) {
   const marca = item.timestamp ?? item.fecha_hora ?? item.ts;
   if (marca === undefined) return null;
   const d = new Date(marca);
-  return Number.isNaN(d.getTime()) ? String(marca) : d.toTimeString().slice(0, 8);
+  return Number.isNaN(d.getTime())
+    ? String(marca)
+    : d.toTimeString().slice(0, 8);
 }
 
 function leerAlturas(json) {
@@ -372,7 +447,8 @@ function leerAlturas(json) {
       let altura = Number(item.altura ?? item.altitud ?? item.alt);
       if (!Number.isFinite(altura)) {
         const presion = item.p ?? item.pressure ?? item.presion;
-        if (presion !== undefined) altura = alturaDesdePresion(presionEnHpa(presion));
+        if (presion !== undefined)
+          altura = alturaDesdePresion(presionEnHpa(presion));
       }
       const hora = etiquetaHora(item);
       return { etiqueta: hora || i + 1, altura, esHora: Boolean(hora) };

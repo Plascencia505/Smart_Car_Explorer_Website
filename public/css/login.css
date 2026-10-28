@@ -36,7 +36,7 @@
 /* Recuadro del título con la imagen de fondo */
 .banner-titulo {
   width: 100%;
-  max-width: 600px;
+  max-width: 230rem;
   min-height: 250px;
   margin-bottom: 18px;
   padding: 26px 22px 24px;
@@ -45,7 +45,7 @@
   justify-content: center;            /* título centrado vertical y horizontalmente */
   align-items: center;
   text-align: center;
-  overflow: hidden;
+  overflow:visible;
   border-radius: 14px;
   border: 1px solid rgba(255,255,255,.25);
   box-shadow: 0 16px 40px rgba(0,0,0,.4);

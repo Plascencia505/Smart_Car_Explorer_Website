@@ -15,7 +15,47 @@ if (sesionActual) {
   btnSalir.setAttribute("aria-label", texto);
 }
 
-btnSalir.addEventListener("click", (e) => {
+// Botón de salida modificado con SweetAlert2
+btnSalir.addEventListener("click", async (e) => {
   e.preventDefault();
-  if (confirm("¿Deseas cerrar sesión?")) cerrarSesion();
+  const confirmar = await confirmarSwal("¿Deseas cerrar sesión de forma segura?", "Cerrar sesión");
+  if (confirmar) cerrarSesion();
 });
+
+// ===== SweetAlert2 Helpers Globales (Tema Oscuro / Coherente con el sitio) =====
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3500,
+  timerProgressBar: true,
+  background: "#1a1a1a",
+  color: "#f0f0f0",
+});
+
+async function confirmarSwal(mensaje, titulo = "¿Estás seguro?") {
+  const resultado = await Swal.fire({
+    title: titulo,
+    text: mensaje,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#e8792f", // Color acento de tu app
+    cancelButtonColor: "#444444",
+    confirmButtonText: "Sí, continuar",
+    cancelButtonText: "Cancelar",
+    background: "#1a1a1a",
+    color: "#f0f0f0",
+  });
+  return resultado.isConfirmed;
+}
+
+async function alertaSwal(mensaje, tipo = "info", titulo = "") {
+  await Swal.fire({
+    title: titulo,
+    text: mensaje,
+    icon: tipo,
+    confirmButtonColor: "#e8792f",
+    background: "#1a1a1a",
+    color: "#f0f0f0",
+  });
+}

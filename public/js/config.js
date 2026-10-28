@@ -28,6 +28,7 @@ const CONFIG = {
     registros: "/api/telemetry",         // GET ?limit=N&startDate=...&endDate=...  (limit=0 → todos)
     ultimo: "/api/telemetry/latest",     // GET → último registro (404 si no hay)
     borrar: (id) => `/api/telemetry/${encodeURIComponent(id)}`,  // DELETE (solo Administrador)
+    register: "/api/register"
   },
 
   // Roles tal como los guarda el Back-End (models/User.js)
@@ -58,7 +59,7 @@ const CONFIG = {
 
   /* ---------- Comportamiento ---------- */
   // Sin registros nuevos durante este tiempo, el robot se considera apagado
-  SEGUNDOS_ROBOT_APAGADO: 20,
+  SEGUNDOS_ROBOT_APAGADO: 30,
   // Minutos de historial para las gráficas y el recorrido del mapa
   MINUTOS_HISTORIAL: 30,
   // Registros que se cargan en Base de datos para buscar (0 = todos)
