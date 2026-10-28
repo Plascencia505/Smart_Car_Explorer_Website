@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Protección: sin sesión iniciada, regresa a /login -->
+  <script src="/js/config.js"></script>
+  <script src="/js/sesion.js"></script>
+  <title>Base de datos | Smart Car Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/paneles.css">
+  <link rel="stylesheet" href="/css/base-datos.css">
+</head>
+<body data-seccion="base-datos">
+  <div class="fondo"></div>
+  <div class="fondo-oscuro"></div>
+
+  <nav class="nav">
+    <a href="/inicio" class="nav-titulo">
+      <!-- Icono del robot -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="8" width="16" height="10" rx="2"/>
+        <path d="M12 8V4M9 4h6"/>
+        <circle cx="9" cy="13" r="1.3" fill="currentColor"/>
+        <circle cx="15" cy="13" r="1.3" fill="currentColor"/>
+        <circle cx="7" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/>
+      </svg>
+      Smart Car Explorer
+    </a>
+
+    <ul class="nav-links" id="menu">
+      <li><a href="/inicio">Inicio</a></li>
+      <li><a href="/base-datos" class="activo">Base de datos</a></li>
+      <li><a href="/monitoreo">Monitoreo</a></li>
+      <li><a href="/gestion">Gestión</a></li>
+    </ul>
+
+    <button class="nav-hamburguesa" id="btnMenu" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+
+    <a href="#" class="nav-salir" id="btnSalir" title="Cerrar sesión" aria-label="Cerrar sesión">
+      <!-- Icono de salida (puerta) -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/>
+        <path d="M13 3v18"/>
+        <circle cx="16" cy="12" r=".6" fill="currentColor"/>
+        <path d="M9 12H3M6 9l-3 3 3 3"/>
+      </svg>
+    </a>
+  </nav>
+
+  <main class="contenido">
+
+    <!-- ================= EVENTOS REGISTRADOS (CRUD) ================= -->
+    <section class="seccion">
+      <h2 class="seccion-titulo">Eventos registrados</h2>
+
+      <div class="barra-herramientas">
+        <div class="buscador">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+          </svg>
+          <input type="search" id="busqueda" placeholder="Buscar por fecha, hora, temperatura..." autocomplete="off">
+        </div>
+
+        <!-- Exportar: todos los registros, o los que coincidan con la búsqueda -->
+        <div class="exportar" role="group" aria-label="Exportar registros">
+          <span class="exportar-etiqueta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 18v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1"/>
+            </svg>
+            Exportar
+          </span>
+          <button type="button" class="btn-exportar" data-formato="csv">CSV</button>
+          <button type="button" class="btn-exportar" data-formato="json">JSON</button>
+        </div>
+      </div>
+
+      <div class="panel panel-tabla">
+        <div class="tabla-scroll">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+                <th>Temp. (°C)</th>
+                <th>Presión (hPa)</th>
+                <th title="Calculada a partir de la presión">Altura (m)*</th>
+                <th class="col-acciones">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoTabla"></tbody>
+          </table>
+        </div>
+        <p class="tabla-info" id="tablaInfo">Cargando registros…</p>
+        <p class="tabla-nota">* La altura se calcula a partir de la presión atmosférica (es aproximada).</p>
+      </div>
+    </section>
+
+    <!-- ================= EVENTOS GRAFICADOS ================= -->
+    <section class="seccion">
+      <h2 class="seccion-titulo">Gráficas de altura</h2>
+
+      <div class="graficas">
+        <!-- Gráfica en tiempo real -->
+        <div class="grafica-col">
+          <div class="grafica-acciones">
+            <label class="selector-actualizar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>
+              </svg>
+              Graficar:
+              <select id="intervalo" title="Cada cuánto se dibuja un punto en la gráfica (promedio de las lecturas de ese lapso)">
+                <option value="2">Cada lectura (tiempo real)</option>
+                <option value="10">Cada 10 segundos</option>
+                <option value="20">Cada 20 segundos</option>
+                <option value="30">Cada 30 segundos</option>
+              </select>
+            </label>
+            <span class="estado-vivo desconectado" id="estadoConexion"><span class="punto"></span><span class="texto-conexion">Conectando…</span></span>
+          </div>
+          <div class="panel panel-grafica">
+            <div class="grafica-encabezado">
+              <h3>Altura en tiempo real</h3>
+              <span class="valor-actual" id="alturaActual">-- m</span>
+            </div>
+            <div class="lienzo">
+              <canvas id="graficaTiempoReal"></canvas>
+              <div class="grafica-aviso" id="avisoPromedio" hidden>
+                <span class="giro"></span>
+                <span id="avisoTexto">Calculando el primer promedio…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfica del archivo de la microSD -->
+        <div class="grafica-col">
+          <div class="grafica-acciones">
+            <label class="btn-archivo" for="archivoJSON">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>
+              </svg>
+              Cargar archivo (JSON)
+            </label>
+            <input type="file" id="archivoJSON" accept=".json,application/json" hidden>
+          </div>
+          <div class="panel panel-grafica">
+            <div class="grafica-encabezado">
+              <h3>Altura de registros</h3>
+              <span class="nombre-archivo" id="nombreArchivo">Sin archivo</span>
+            </div>
+            <div class="lienzo">
+              <canvas id="graficaArchivo"></canvas>
+              <div class="grafica-vacia" id="graficaVacia">
+                Carga el archivo JSON de la microSD para graficar los registros de altura.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <!-- Cliente de Socket.IO: lo entrega el mismo servidor -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/grafica-vivo.js"></script>
+  <script src="/js/base-datos.js"></script>
+</body>
+</html>

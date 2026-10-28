@@ -1,0 +1,195 @@
+/* ===== Smart Car Explorer · Componentes compartidos =====
+   Paneles, secciones y gráficas en tiempo real.
+   Lo usan "Base de datos" y "Monitoreo". */
+
+:root {
+  --panel: #f2f2f2;
+  --panel-borde: #d4d4d4;
+  --panel-texto: #1a1a1a;
+  --panel-suave: #6b6b6b;
+}
+
+/* El contenido de esta página va de arriba hacia abajo (con scroll) */
+main.contenido {
+  display: block;
+  min-height: auto;
+  padding: 40px 4vw 64px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.seccion { margin-bottom: 56px; animation: aparecer .6s ease both; }
+
+.seccion-titulo {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-shadow: 0 1px 8px rgba(0,0,0,.6);
+}
+
+.panel {
+  background: var(--panel);
+  color: var(--panel-texto);
+  border: 1px solid var(--panel-borde);
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+}
+
+/* ---------- Gráficas ---------- */
+.graficas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.grafica-col { display: flex; flex-direction: column; min-width: 0; }
+
+.grafica-acciones {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  min-height: 42px;
+  margin-bottom: 10px;
+}
+
+.estado-vivo {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .85rem;
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
+}
+.punto {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #3ddc84;
+  animation: latido 1.4s infinite;
+}
+@keyframes latido { 50% { opacity: .3; } }
+.estado-vivo.desconectado .punto { background: #e74c3c; animation: none; }
+
+.panel-grafica { padding: 18px 18px 14px; }
+.grafica-encabezado {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  margin-bottom: 10px;
+}
+.grafica-encabezado h3 { font-size: 1.05rem; font-weight: 600; }
+.valor-actual { font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.lienzo { position: relative; height: 280px; }
+
+/* ---------- Selector de actualización ---------- */
+
+.selector-actualizar {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 42px;
+  padding: 0 6px 0 14px;
+  font-weight: 600;
+  font-size: .92rem;
+  color: var(--panel-texto);
+  background: #fff;
+  border: 1px solid var(--panel-borde);
+  border-radius: 6px;
+}
+.selector-actualizar { max-width: 100%; }
+.selector-actualizar svg { width: 18px; height: 18px; flex-shrink: 0; }
+.selector-actualizar select { min-width: 0; flex: 1; }
+.selector-actualizar select {
+  height: 32px;
+  padding: 0 8px;
+  font: inherit;
+  font-weight: 500;
+  color: var(--panel-texto);
+  background: var(--panel);
+  border: 1px solid var(--panel-borde);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.selector-actualizar select:focus { outline: 2px solid var(--acento); outline-offset: 0; }
+
+/* ---------- Aviso mientras se calcula el primer promedio ---------- */
+.grafica-aviso {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  text-align: center;
+  padding: 24px;
+  color: var(--panel-suave);
+  font-weight: 500;
+  background: rgba(242,242,242,.85);
+  border-radius: 6px;
+}
+.grafica-aviso[hidden] { display: none; }
+.giro {
+  width: 26px; height: 26px;
+  border: 3px solid var(--panel-borde);
+  border-top-color: var(--acento);
+  border-radius: 50%;
+  animation: girar .9s linear infinite;
+}
+@keyframes girar { to { transform: rotate(360deg); } }
+
+/* ---------- Mapa: marcador del robot (Monitoreo y Gestión) ---------- */
+.marcador-robot {
+  position: relative;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--acento);
+  color: #fff;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.marcador-robot svg { width: 20px; height: 20px; }
+.marcador-robot::after {           /* pulso alrededor del robot */
+  content: "";
+  position: absolute; inset: -3px;
+  border-radius: 50%;
+  border: 3px solid var(--acento);
+  animation: pulso 1.8s ease-out infinite;
+}
+@keyframes pulso {
+  from { transform: scale(1); opacity: .8; }
+  to   { transform: scale(2); opacity: 0; }
+}
+
+/* ---------- Interruptores (Monitoreo y Gestión) ---------- */
+.interruptor {
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 42px;
+  padding: 0 14px;
+  font-weight: 600;
+  font-size: .92rem;
+  color: var(--panel-texto);
+  background: #fff;
+  border: 1px solid var(--panel-borde);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+.interruptor input { position: absolute; opacity: 0; pointer-events: none; }
+.interruptor-pista {
+  position: relative;
+  width: 36px; height: 20px;
+  background: #c9c9c9;
+  border-radius: 999px;
+  transition: background .2s;
+}
+.interruptor-pista::after {
+  content: "";
+  position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  transition: transform .2s;
+}
+.interruptor input:checked + .interruptor-pista { background: var(--acento); }
+.interruptor input:checked + .interruptor-pista::after { transform: translateX(16px); }
+.interruptor input:focus-visible + .interruptor-pista { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+/* ---------- Móvil ---------- */
+@media (max-width: 860px) {
+  .graficas { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  main.contenido { padding: 28px 16px 48px; }
+  .lienzo { height: 240px; }
+}

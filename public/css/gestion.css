@@ -1,0 +1,309 @@
+/* ===== Smart Car Explorer · Estilos de "Gestión" =====
+   Requiere css/paneles.css (paneles, interruptores y marcador del robot). */
+
+:root {
+  --apagado-fondo: #8d8d8d;
+  --apagado-texto: #d6d6d6;
+  --flecha: #ffffff;
+  --flecha-activa: var(--acento);
+}
+
+main.gestion { max-width: 1100px; }
+
+.centrado { text-align: center; }
+
+/* ---------- Estado del robot ---------- */
+.estado-robot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.pastilla-estado {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  font-weight: 600;
+  font-size: .9rem;
+  color: var(--panel-texto);
+  background: #fff;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+}
+.pastilla-estado.apagado { color: #555; background: #d9d9d9; }
+.pastilla-estado.apagado .punto { background: #8d8d8d; animation: none; }
+
+.interruptor-demo { height: 36px; font-size: .85rem; font-weight: 500; }
+
+/* ---------- Botones de modo ---------- */
+.modos {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.btn-modo {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-width: 190px;
+  height: 52px;
+  padding: 0 24px;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--panel-texto);
+  background: var(--panel);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  cursor: pointer;
+  transition: background .2s, color .2s, transform .15s;
+}
+.btn-modo svg { width: 22px; height: 22px; }
+.btn-modo:hover:not(:disabled):not(.activo) { background: #fff; transform: translateY(-2px); }
+.btn-modo.activo {
+  background: var(--acento);
+  color: #fff;
+  border-color: #fff;
+}
+.btn-modo:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* Robot apagado: ambos botones en tono "apagado" */
+.btn-modo:disabled,
+.btn-modo.activo:disabled {
+  background: var(--apagado-fondo);
+  color: var(--apagado-texto);
+  border-color: transparent;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.instruccion {
+  text-align: center;
+  font-size: 1.02rem;
+  margin-bottom: 20px;
+  text-shadow: 0 1px 8px rgba(0,0,0,.7);
+}
+.instruccion.izquierda { text-align: left; margin-bottom: 0; }
+.teclado { display: block; font-size: .85rem; opacity: .85; margin-top: 4px; }
+kbd {
+  display: inline-block;
+  min-width: 22px;
+  padding: 1px 6px;
+  margin: 0 2px;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--panel-texto);
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 0 #aaa;
+  text-shadow: none;
+}
+
+.panel-modo { animation: aparecer .35s ease both; }
+.panel-modo[hidden] { display: none; }
+
+/* ---------- Joystick (modo manual) ---------- */
+.joystick {
+  --tam: clamp(64px, 11vw, 96px);
+  display: grid;
+  grid-template-columns: var(--tam) minmax(180px, 260px) var(--tam);
+  grid-template-rows: var(--tam) auto var(--tam);
+  grid-template-areas:
+    ".    arriba ."
+    "izq  chasis der"
+    ".    abajo  .";
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+}
+
+.flecha {
+  width: var(--tam); height: var(--tam);
+  display: flex; align-items: center; justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: none;          /* evita que el celular haga scroll al presionar */
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.flecha svg {
+  width: 82%; height: 82%;
+  transform: rotate(var(--giro));
+  fill: var(--flecha);
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,.5));
+  transition: fill .1s, transform .1s;
+}
+.flecha:hover:not(:disabled) svg { fill: #ffe2cc; }
+.flecha.presionada svg { fill: var(--flecha-activa); transform: rotate(var(--giro)) scale(.9); }
+.flecha:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.flecha:disabled { cursor: not-allowed; }
+.flecha:disabled svg { fill: var(--apagado-fondo); filter: none; opacity: .7; }
+
+.chasis {
+  grid-area: chasis;
+  width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 18px 14px 14px;
+  background: var(--panel);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.3);
+  transition: opacity .2s, filter .2s;
+}
+.chasis svg { width: 100%; max-height: 300px; }
+.chasis .placa { fill: #c9ccd1; stroke: #8b9097; stroke-width: 3; }
+.chasis .rueda { fill: #2d2f33; }
+.chasis .sensor { fill: #2f6fa8; }
+.chasis .sensor-ojo { fill: #d9dde2; stroke: #7a7f86; stroke-width: 2; }
+.chasis .tarjeta { fill: #2c6e49; }
+.chasis .chip { fill: #1d1f22; }
+.chasis .orificio { fill: #8b9097; }
+.chasis .indicador-frente { fill: var(--acento); }
+.chasis .texto-chasis { font: 700 12px "Inter", sans-serif; fill: #4a4f56; text-anchor: middle; letter-spacing: .05em; }
+
+.comando-actual {
+  font-weight: 700;
+  font-size: .95rem;
+  color: var(--panel-texto);
+}
+
+.joystick.apagado .chasis { opacity: .55; filter: grayscale(1); }
+
+/* ---------- Modo automático ---------- */
+.barra-automatico {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.btn-dirigir {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  flex-shrink: 0;
+  min-width: 170px;
+  height: 46px;
+  padding: 0 20px;
+  font: inherit;
+  font-weight: 700;
+  color: #fff;
+  background: var(--acento);
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  cursor: pointer;
+  transition: background .2s, transform .15s;
+}
+.btn-dirigir svg { width: 18px; height: 18px; }
+.btn-dirigir:hover:not(:disabled) { transform: translateY(-2px); }
+.btn-dirigir.cancelar { background: #c0392b; }
+.btn-dirigir:disabled {
+  background: var(--apagado-fondo);
+  color: var(--apagado-texto);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.panel-mapa-gestion { position: relative; overflow: hidden; }
+
+#mapaGestion { height: 460px; width: 100%; background: #dfe3e8; cursor: crosshair; }
+#mapaGestion.viajando { cursor: grab; }
+#mapaGestion[hidden] { display: none; }
+
+.sin-robot {
+  height: 460px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #6b6b6b;
+  background: repeating-linear-gradient(45deg, #ececec 0 14px, #e3e3e3 14px 28px);
+}
+.sin-robot svg { width: 64px; height: 64px; }
+.sin-robot[hidden] { display: none; }
+
+.ruta-datos {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  border-top: 1px solid var(--panel-borde);
+}
+.ruta-datos div {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 18px;
+  border-right: 1px solid var(--panel-borde);
+  min-width: 0;
+}
+.ruta-datos div:last-child { border-right: none; }
+.ruta-datos span {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--panel-suave);
+}
+.ruta-datos strong {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ruta-datos[hidden] { display: none; }
+
+/* Marcador del destino */
+.marcador-destino {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  background: #c0392b;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.marcador-destino::after {
+  content: "";
+  width: 8px; height: 8px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+/* Aviso flotante (ej. "El robot llegó a su destino") */
+.aviso-flotante {
+  position: fixed;
+  left: 50%; bottom: 28px;
+  z-index: 60;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 12px 20px;
+  font-weight: 600;
+  color: #fff;
+  background: #1f2430;
+  border-left: 4px solid var(--acento);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  animation: aparecer .25s ease both;
+}
+.aviso-flotante[hidden] { display: none; }
+
+/* ---------- Móvil ---------- */
+@media (max-width: 760px) {
+  .estado-robot { justify-content: center; }
+  .modos { gap: 10px; }
+  .btn-modo { min-width: 0; flex: 1; padding: 0 12px; font-size: .95rem; }
+  .teclado { display: none; }   /* en celular no hay teclado físico */
+  .joystick { --tam: 64px; grid-template-columns: var(--tam) minmax(130px, 1fr) var(--tam); gap: 6px; }
+  .chasis { padding: 12px 8px 10px; }
+  .barra-automatico { flex-direction: column; align-items: stretch; }
+  .instruccion.izquierda { text-align: center; }
+  #mapaGestion, .sin-robot { height: 360px; }
+  .ruta-datos { grid-template-columns: 1fr 1fr; }
+  .ruta-datos div { border-bottom: 1px solid var(--panel-borde); }
+  .ruta-datos div:nth-child(2n) { border-right: none; }
+  .ruta-datos div:nth-last-child(-n+2) { border-bottom: none; }
+}
