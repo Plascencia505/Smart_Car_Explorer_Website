@@ -18,7 +18,7 @@ async function llamarApi(ruta, opciones = {}) {
   let respuesta;
   try {
     respuesta = await fetch(CONFIG.SERVIDOR + ruta, {
-      credentials: "include",   // envía la cookie de sesión
+      credentials: "include", // envía la cookie de sesión
       headers: opciones.body ? { "Content-Type": "application/json" } : {},
       ...opciones,
     });
@@ -29,7 +29,11 @@ async function llamarApi(ruta, opciones = {}) {
   let datos = null;
   const tipo = respuesta.headers.get("Content-Type") || "";
   if (tipo.includes("application/json")) {
-    try { datos = await respuesta.json(); } catch { /* respuesta vacía */ }
+    try {
+      datos = await respuesta.json();
+    } catch {
+      /* respuesta vacía */
+    }
   }
 
   if (!respuesta.ok) {
@@ -37,7 +41,10 @@ async function llamarApi(ruta, opciones = {}) {
     if (respuesta.status === 401 && !ruta.startsWith("/api/auth")) {
       irAlLogin();
     }
-    const mensaje = datos?.error || datos?.errors?.[0]?.msg || `Error del servidor (${respuesta.status}).`;
+    const mensaje =
+      datos?.error ||
+      datos?.errors?.[0]?.msg ||
+      `Error del servidor (${respuesta.status}).`;
     throw new ErrorApi(mensaje, respuesta.status);
   }
   return datos;
@@ -75,6 +82,18 @@ const api = {
     return llamarApi(CONFIG.RUTAS.login, {
       method: "POST",
       body: JSON.stringify({ username: usuario, password: contrasena }),
+    });
+  },
+
+  // POST /api/auth/register → { message }
+  registrar(usuario, correo, contrasena) {
+    return llamarApi(CONFIG.RUTAS.registro, {
+      method: "POST",
+      body: JSON.stringify({
+        username: usuario,
+        email: correo,
+        password: contrasena,
+      }),
     });
   },
 };
@@ -159,5 +178,6 @@ function pintarConexion(elemento, conectado) {
   if (!elemento) return;
   elemento.classList.toggle("desconectado", !conectado);
   const texto = elemento.querySelector(".texto-conexion");
-  if (texto) texto.textContent = conectado ? "En vivo" : "Sin conexión con el servidor";
+  if (texto)
+    texto.textContent = conectado ? "En vivo" : "Sin conexión con el servidor";
 }

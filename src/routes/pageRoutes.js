@@ -20,6 +20,7 @@ const PAGINAS_PRIVADAS = {
 
 const TODAS_LAS_PAGINAS = {
   "/login": "Login.html",
+  "/registro": "Registro.html",
   ...PAGINAS_PRIVADAS,
 };
 
@@ -32,7 +33,7 @@ const RUTA_POR_ARCHIVO = Object.fromEntries(
 
 const router = Router();
 
-// 1. Normalización de Trailing Slash (ej. /inicio/ -> /inicio)
+// Normalización de Trailing Slash (ej. /inicio/ -> /inicio)
 router.use((req, res, next) => {
   if (req.path.length > 1 && req.path.endsWith("/")) {
     const rutaLimpia = req.path.slice(0, -1);
@@ -69,6 +70,12 @@ router.get("/", (req, res) => {
 router.get("/login", redirectIfAuthenticated, (req, res) => {
   res.set("Cache-Control", "no-store");
   res.sendFile(path.join(carpetaFrontEnd, "Login.html"));
+});
+
+// Ruta pública de Registro
+router.get("/registro", redirectIfAuthenticated, (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.sendFile(path.join(carpetaFrontEnd, "Registro.html"));
 });
 
 // Rutas privadas protegidas por sesión en servidor

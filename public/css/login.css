@@ -279,3 +279,8 @@
   .tarjeta-robot { max-width: 340px; }
   .tarjeta-login { padding: 28px 20px 22px; }
 }
+
+/* Subrayado al pasar el cursor en enlaces de autenticación */
+.tarjeta-login p a:hover {
+  text-decoration: underline !important;
+}

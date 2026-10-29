@@ -17,7 +17,13 @@ function paginaDestino() {
 }
 
 // Si ya hay sesión guardada, no tiene caso mostrar el login
-if (obtenerSesion()) location.replace(paginaDestino());
+// Si el servidor nos expulsó de una página privada, la URL tendrá "?volver="
+// Eso significa que la sesión caducó en el backend. Borramos la local.
+if (new URLSearchParams(location.search).has("volver")) {
+  olvidarSesion();
+} else if (obtenerSesion()) {
+  location.replace(paginaDestino());
+}
 
 /* ---------- Mensajes de error ---------- */
 function mostrarError(mensaje, campo) {

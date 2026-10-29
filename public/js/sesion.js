@@ -32,14 +32,23 @@ function guardarSesion(sesion) {
 }
 
 function olvidarSesion() {
-  try { localStorage.removeItem(CLAVE_SESION); } catch { /* sin almacenamiento */ }
+  try {
+    localStorage.removeItem(CLAVE_SESION);
+  } catch {
+    /* sin almacenamiento */
+  }
 }
 
 // Cierra la sesión en el servidor y regresa al login
 async function cerrarSesion() {
   try {
-    await fetch(CONFIG.SERVIDOR + CONFIG.RUTAS.logout, { method: "POST", credentials: "include" });
-  } catch { /* aunque falle la red, se sale de la página */ }
+    await fetch(CONFIG.SERVIDOR + CONFIG.RUTAS.logout, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch {
+    /* aunque falle la red, se sale de la página */
+  }
   olvidarSesion();
   window.location.replace(CONFIG.PAGINAS.login);
 }
@@ -48,28 +57,34 @@ async function cerrarSesion() {
 function irAlLogin() {
   olvidarSesion();
   const pagina = location.pathname;
-  location.replace(esPaginaDelSitio(pagina)
-    ? `${CONFIG.PAGINAS.login}?volver=${encodeURIComponent(pagina)}`
-    : CONFIG.PAGINAS.login);
+  location.replace(
+    esPaginaDelSitio(pagina)
+      ? `${CONFIG.PAGINAS.login}?volver=${encodeURIComponent(pagina)}`
+      : CONFIG.PAGINAS.login,
+  );
 }
 
 const esAdmin = () => obtenerSesion()?.rol === "admin";
 
 // Solo las páginas propias del sitio (sin el login) son destinos válidos
 function esPaginaDelSitio(ruta) {
-  return Object.values(CONFIG.PAGINAS).includes(ruta) && ruta !== CONFIG.PAGINAS.login;
+  return (
+    Object.values(CONFIG.PAGINAS).includes(ruta) &&
+    ruta !== CONFIG.PAGINAS.login &&
+    ruta !== CONFIG.PAGINAS.registro
+  );
 }
 
 // Protección de la página: se ejecuta en cuanto se carga este archivo
 (function protegerPagina() {
-  const enLogin = location.pathname === CONFIG.PAGINAS.login;
+  const esPublica =
+    location.pathname === CONFIG.PAGINAS.login ||
+    location.pathname === CONFIG.PAGINAS.registro;
   const sesion = obtenerSesion();
 
-  if (!sesion && !enLogin) {
+  if (!sesion && !esPublica) {
     irAlLogin();
     return;
   }
-  // El rol se pone en <html data-rol="..."> para que el CSS oculte
-  // lo que un "Usuario" no puede hacer (por ejemplo, borrar registros)
   if (sesion) document.documentElement.dataset.rol = sesion.rol;
 })();

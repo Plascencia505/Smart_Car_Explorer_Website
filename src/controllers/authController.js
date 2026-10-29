@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 export const register = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password } = req.body;
 
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
@@ -21,7 +21,7 @@ export const register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      role,
+      role: "Usuario", // Solo rol de usuario desde el sitio web
     });
     await newUser.save();
 
@@ -47,9 +47,14 @@ export const login = async (req, res) => {
     req.session.userId = user._id;
     req.session.role = user.role;
 
-    res
-      .status(200)
-      .json({ message: "Inicio de sesión exitoso.", role: user.role });
+    req.session.save((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Error al guardar la sesión." });
+      }
+      res
+        .status(200)
+        .json({ message: "Inicio de sesión exitoso.", role: user.role });
+    });
   } catch (error) {
     res.status(500).json({ error: "Error interno al iniciar sesión." });
   }

@@ -28,11 +28,8 @@ router.post(
       .normalizeEmail()
       .withMessage("El formato de correo es inválido."),
     body("password")
-      .isLength({ min: 6 })
-      .withMessage("La contraseña debe tener mínimo 6 caracteres."),
-    body("role")
-      .isIn(["Administrador", "Usuario"])
-      .withMessage("El rol asignado no es válido."),
+      .isLength({ min: 8 })
+      .withMessage("La contraseña debe tener mínimo 8 caracteres."),
   ],
   validateRequest,
   register,

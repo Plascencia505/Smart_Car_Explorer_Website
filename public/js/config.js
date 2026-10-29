@@ -11,6 +11,7 @@ const CONFIG = {
   /* ---------- Direcciones de las páginas (las define src/routes/pageRoutes.js) ---------- */
   PAGINAS: {
     login: "/login",
+    registro: "/registro",
     inicio: "/inicio",
     baseDatos: "/base-datos",
     monitoreo: "/monitoreo",
@@ -24,11 +25,11 @@ const CONFIG = {
 
   RUTAS: {
     login: "/api/auth/login",            // POST { username, password } → { message, role }
+    registro: "/api/auth/register",      // POST { username, email, password }
     logout: "/api/auth/logout",          // POST
     registros: "/api/telemetry",         // GET ?limit=N&startDate=...&endDate=...  (limit=0 → todos)
     ultimo: "/api/telemetry/latest",     // GET → último registro (404 si no hay)
     borrar: (id) => `/api/telemetry/${encodeURIComponent(id)}`,  // DELETE (solo Administrador)
-    register: "/api/register"
   },
 
   // Roles tal como los guarda el Back-End (models/User.js)
