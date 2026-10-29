@@ -199,3 +199,37 @@ html[data-rol="usuario"] .col-acciones { display: none; }
   cursor: pointer;
 }
 .btn-exportar:disabled { cursor: progress; opacity: .6; }
+
+.pie-tabla {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.btn-pagina {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--tarjeta-suave, #6b6b6b);
+  background: transparent;
+  border: 1px solid var(--tarjeta-borde, #d4d4d4);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-pagina:hover {
+  border-color: var(--acento, #e8792f);
+  color: var(--tarjeta-texto, #1a1a1a);
+}
+.btn-pagina.activa {
+  background: var(--acento, #e8792f);
+  color: #fff;
+  border-color: var(--acento, #e8792f);
+}

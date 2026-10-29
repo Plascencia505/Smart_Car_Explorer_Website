@@ -109,10 +109,90 @@ function filaMensaje(texto) {
   return `<tr class="sin-registros"><td colspan="${COLUMNAS_TABLA + 1}">${texto}</td></tr>`;
 }
 
+let paginaActual = 1;
+const paginacionTabla = $("paginacionTabla");
+
+function renderizarPaginacion(totalFilas) {
+  const totalPaginas = Math.ceil(totalFilas / MAX_FILAS);
+  if (totalPaginas <= 1) {
+    paginacionTabla.innerHTML = "";
+    return;
+  }
+
+  // Si son 5 páginas o menos, se muestran todas directamente sin elipsis
+  if (totalPaginas <= 5) {
+    paginacionTabla.innerHTML = Array.from(
+      { length: totalPaginas },
+      (_, i) => i + 1,
+    )
+      .map(
+        (p) =>
+          `<button class="btn-pagina ${p === paginaActual ? "activa" : ""}" data-pag="${p}">${p}</button>`,
+      )
+      .join("");
+    return;
+  }
+
+  const paginas = [];
+
+  if (paginaActual <= 4) {
+    // Cerca del inicio: 1 2 3 4 5 ... N
+    paginas.push(1, 2, 3, 4, 5, "...", totalPaginas);
+  } else if (paginaActual >= totalPaginas - 3) {
+    // Cerca del final: 1 ... N-4 N-3 N-2 N-1 N
+    paginas.push(
+      1,
+      "...",
+      totalPaginas - 4,
+      totalPaginas - 3,
+      totalPaginas - 2,
+      totalPaginas - 1,
+      totalPaginas,
+    );
+  } else {
+    // En medio: 1 ... actual-1 actual actual+1 ... N
+    paginas.push(
+      1,
+      "...",
+      paginaActual - 1,
+      paginaActual,
+      paginaActual + 1,
+      "...",
+      totalPaginas,
+    );
+  }
+
+  paginacionTabla.innerHTML = paginas
+    .map((p) => {
+      if (p === "...") {
+        return `<span class="paginacion-elipsis">…</span>`;
+      }
+      return `<button class="btn-pagina ${p === paginaActual ? "activa" : ""}" data-pag="${p}">${p}</button>`;
+    })
+    .join("");
+}
+
+// Interceptor del click que ignora los puntos suspensivos
+paginacionTabla.addEventListener("click", (e) => {
+  const boton = e.target.closest(".btn-pagina");
+  if (boton && boton.dataset.pag) {
+    paginaActual = Number(boton.dataset.pag);
+    actualizarTabla();
+  }
+});
+
+paginacionTabla.addEventListener("click", (e) => {
+  if (e.target.tagName === "BUTTON") {
+    paginaActual = Number(e.target.dataset.pag);
+    actualizarTabla();
+  }
+});
+
 function actualizarTabla() {
   if (estadoCarga === "cargando" && registros.length === 0) {
     cuerpoTabla.innerHTML = filaMensaje("Cargando registros…");
     tablaInfo.textContent = "";
+    paginacionTabla.innerHTML = "";
     return;
   }
   if (estadoCarga === "error" && registros.length === 0) {
@@ -121,24 +201,35 @@ function actualizarTabla() {
     );
     $("btnReintentar").addEventListener("click", cargarRegistros);
     tablaInfo.textContent = "";
+    paginacionTabla.innerHTML = "";
     return;
   }
 
   const consulta = inputBusqueda.value.trim();
-  const filas = consulta ? buscar(consulta) : recientes(registros);
+  // buscar() y recientes() devuelven la lista completa filtrada/ordenada, ya no cortamos con MAX_FILAS ahí
+  const filasTotales = consulta
+    ? buscar(consulta, registros, Infinity)
+    : [...registros].sort(masReciente);
 
-  if (filas.length === 0) {
+  if (filasTotales.length === 0) {
     cuerpoTabla.innerHTML = filaMensaje(
       consulta
         ? "No se encontraron registros"
         : "Aún no hay registros guardados.",
     );
     tablaInfo.textContent = "";
+    paginacionTabla.innerHTML = "";
     return;
   }
 
-  // El ID no se muestra, pero se guarda en el botón para saber qué registro borrar
-  cuerpoTabla.innerHTML = filas
+  // Lógica de paginación
+  const totalPaginas = Math.ceil(filasTotales.length / MAX_FILAS);
+  if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+
+  const inicio = (paginaActual - 1) * MAX_FILAS;
+  const filasPagina = filasTotales.slice(inicio, inicio + MAX_FILAS);
+
+  cuerpoTabla.innerHTML = filasPagina
     .map((r) => {
       const v = camposVisibles(r);
       return `
@@ -152,21 +243,29 @@ function actualizarTabla() {
       <td class="num">${v.altura}</td>
       <td class="col-acciones">
         <div class="acciones">
-          <button class="btn-icono borrar" data-id="${r.id}" title="Borrar registro" aria-label="Borrar registro del ${v.fecha} a las ${v.hora}">${ICONO_BOTE}</button>
+          <button class="btn-icono borrar" data-id="${r.id}" title="Borrar registro" aria-label="Borrar registro del ${v.fecha}">${ICONO_BOTE}</button>
         </div>
       </td>
     </tr>`;
     })
     .join("");
 
-  const total = registros.length;
-  const alcance =
-    CONFIG.LIMITE_REGISTROS_TABLA > 0 && total >= CONFIG.LIMITE_REGISTROS_TABLA
-      ? ` (se buscan los ${total} más recientes)`
-      : "";
   tablaInfo.textContent = consulta
-    ? `Mostrando ${filas.length} registro(s) con más coincidencias para "${consulta}"${alcance}.`
-    : `Mostrando los ${filas.length} registros más recientes de ${total}${alcance ? " cargados" : ""}.`;
+    ? `Mostrando resultados ${inicio + 1} al ${Math.min(inicio + MAX_FILAS, filasTotales.length)} de ${filasTotales.length} coincidencias para "${consulta}".`
+    : `Mostrando registros ${inicio + 1} al ${Math.min(inicio + MAX_FILAS, filasTotales.length)} de ${filasTotales.length} totales.`;
+
+  renderizarPaginacion(filasTotales.length);
+}
+
+// Al escribir en la búsqueda, regresamos a la página 1
+inputBusqueda.addEventListener("input", () => {
+  paginaActual = 1;
+  actualizarTabla();
+});
+
+// Modificar la función recientes() existente arriba en el archivo para que ya no haga .slice()
+function recientes(lista) {
+  return [...lista].sort(masReciente);
 }
 
 inputBusqueda.addEventListener("input", actualizarTabla);
