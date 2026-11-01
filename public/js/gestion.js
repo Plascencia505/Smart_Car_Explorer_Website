@@ -25,6 +25,9 @@ let posicionRobot = null;
 
 const $ = (id) => document.getElementById(id);
 
+// Permite operar el panel si el robot está activo o si el usuario es Administrador (modo pruebas)
+const puedeControlar = () => estado.robotEncendido || esAdmin();
+
 /* ------------------------------------------------------------------
    2. ENVÍO DE ÓRDENES
 ------------------------------------------------------------------ */
@@ -73,7 +76,7 @@ const panelManual = $("panelManual");
 const panelAutomatico = $("panelAutomatico");
 
 async function cambiarModo(modo) {
-  if (modo === estado.modo || !estado.robotEncendido) return;
+  if (modo === estado.modo || !puedeControlar()) return;
 
   if (estado.viajando) {
     const ok = await confirmarSwal(
@@ -122,11 +125,7 @@ const TEXTO_COMANDO = {
 };
 
 function iniciarComando(dir) {
-  if (
-    !estado.robotEncendido ||
-    estado.modo !== "manual" ||
-    estado.comando === dir
-  )
+  if (!puedeControlar() || estado.modo !== "manual" || estado.comando === dir)
     return;
   if (!enviarComando(dir)) return;
   estado.comando = dir;
@@ -142,7 +141,7 @@ function detenerManual() {
     estado.comando = "detener";
     enviarComando("detener");
   }
-  comandoActual.textContent = estado.robotEncendido
+  comandoActual.textContent = puedeControlar()
     ? TEXTO_COMANDO.detener
     : "Robot no encendido";
 }
@@ -235,7 +234,7 @@ const ICONO_ROBOT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 
 // El mapa se crea la primera vez que se abre el modo automático
 function prepararMapa() {
-  if (!estado.robotEncendido) return;
+  if (!puedeControlar()) return;
   if (mapa) {
     mapa.invalidateSize();
     return;
@@ -279,7 +278,7 @@ function prepararMapa() {
   }).addTo(mapa);
 
   mapa.on("click", (e) => {
-    if (estado.viajando || !estado.robotEncendido) return;
+    if (estado.viajando || !puedeControlar()) return;
     elegirDestino(e.latlng);
   });
 }
@@ -315,16 +314,20 @@ function elegirDestino(latlng) {
 
 // Planificación: línea recta del robot al destino, distancia y tiempo estimado
 function actualizarRuta() {
-  if (!estado.destino || !posicionRobot) {
+  const origen = posicionRobot || {
+    lat: CONFIG.CENTRO_MAPA_INICIAL[0],
+    lng: CONFIG.CENTRO_MAPA_INICIAL[1],
+  };
+  if (!estado.destino || (!posicionRobot && !esAdmin())) {
     lineaRuta?.setLatLngs([]);
     $("datoDestino").textContent = "Sin seleccionar";
     $("datoDistanciaRuta").textContent = "--";
     $("datoTiempo").textContent = "--";
     return;
   }
-  const d = distanciaMetros(posicionRobot, estado.destino);
+  const d = distanciaMetros(origen, estado.destino);
   lineaRuta.setLatLngs([
-    [posicionRobot.lat, posicionRobot.lng],
+    [origen.lat, origen.lng],
     [estado.destino.lat, estado.destino.lng],
   ]);
   $("datoDestino").textContent =
@@ -363,7 +366,7 @@ function pintarBotonDirigir() {
     ? '<path d="M6 6l12 12M18 6L6 18"/>'
     : '<path d="M3 11l18-8-8 18-2-8-8-2z"/>';
   btnDirigir.disabled =
-    !estado.robotEncendido || (!estado.viajando && !estado.destino);
+    !puedeControlar() || (!estado.viajando && !estado.destino);
 }
 
 btnDirigir.addEventListener("click", () => {
@@ -372,7 +375,7 @@ btnDirigir.addEventListener("click", () => {
 });
 
 function iniciarViaje() {
-  if (!estado.destino || !estado.robotEncendido) return;
+  if (!estado.destino || !puedeControlar()) return;
   if (!enviarDestino(estado.destino.lat, estado.destino.lng)) return;
   estado.viajando = true;
 
@@ -442,7 +445,9 @@ function cancelarViaje(motivo) {
 function actualizarEstadoRobot(encendido) {
   const cambio = encendido !== estado.robotEncendido;
   estado.robotEncendido = encendido;
+  const habilitado = puedeControlar();
 
+  // La pastilla superior siempre muestra el estado físico real del robot
   $("pastillaEstado").classList.toggle("apagado", !encendido);
   $("textoEstado").textContent = encendido
     ? "Robot encendido"
@@ -452,33 +457,33 @@ function actualizarEstadoRobot(encendido) {
         ? `Robot apagado · último dato: ${estado.ultimaHora}`
         : "Robot apagado · sin datos todavía";
 
-  if (!cambio) return; // sin cambio: solo se actualizó el texto
+  if (!cambio) return;
 
-  // Botones de modo
-  btnManual.disabled = btnAutomatico.disabled = !encendido;
+  // Botones de modo (activos si está encendido o si es Admin)
+  btnManual.disabled = btnAutomatico.disabled = !habilitado;
 
   // Joystick
-  if (!encendido) {
+  if (!habilitado) {
     teclasPresionadas.length = 0;
     detenerManual();
   }
   flechas.forEach((f) => {
-    f.disabled = !encendido;
+    f.disabled = !habilitado;
   });
-  joystick.classList.toggle("apagado", !encendido);
-  comandoActual.textContent = encendido
+  joystick.classList.toggle("apagado", !habilitado);
+  comandoActual.textContent = habilitado
     ? TEXTO_COMANDO[estado.comando]
     : "Robot no encendido";
 
-  // Mapa: se retira y se muestra "Robot no encendido"
-  if (!encendido && estado.viajando) cancelarViaje("Interrumpido");
-  contenedorMapa.hidden = !encendido;
-  rutaDatos.hidden = !encendido;
-  sinRobot.hidden = encendido;
-  instruccionAuto.textContent = encendido
+  // Mapa
+  if (!habilitado && estado.viajando) cancelarViaje("Interrumpido");
+  contenedorMapa.hidden = !habilitado;
+  rutaDatos.hidden = !habilitado;
+  sinRobot.hidden = habilitado;
+  instruccionAuto.textContent = habilitado
     ? "Selecciona en el mapa el sitio donde quieres que el vehículo se dirija."
     : "El robot no está encendido. El mapa volverá a aparecer cuando esté operativo.";
-  if (encendido && estado.modo === "automatico") prepararMapa();
+  if (habilitado && estado.modo === "automatico") prepararMapa();
 
   pintarBotonDirigir();
 }
