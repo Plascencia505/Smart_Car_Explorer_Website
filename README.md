@@ -36,5 +36,5 @@ El proyecto está construido bajo una arquitectura cliente-servidor renderizada 
 
 1. **Clonar el repositorio:**
    ```bash
-   git clone [https://github.com/tu-usuario/Smart_Car_Explorer_Website.git](https://github.com/tu-usuario/Smart_Car_Explorer_Website.git)
+   git clone https://github.com/Plascencia505/Smart_Car_Explorer_Website.git
    cd Smart_Car_Explorer_Website
