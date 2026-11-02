@@ -1,33 +1,40 @@
-# Smart Car Explorer 🚗📡
+# 🚗 Smart Car Explorer - Web Dashboard
 
-Plataforma web full-stack diseñada para el monitoreo y control a distancia de un vehículo robótico autónomo. El sistema integra telemetría en tiempo real, comunicación IoT (LoRa/MQTT), navegación GPS y gestión de perfiles de usuario.
+Plataforma web integral para el monitoreo y control a distancia de un vehículo robótico explorador. Este sistema actúa como la estación de control terrestre, recibiendo telemetría en tiempo real mediante MQTT y permitiendo el envío de comandos de navegación vía WebSockets.
 
-## Características Principales
+## ✨ Características Principales
 
-* **Telemetría en Tiempo Real:** Visualización instantánea de temperatura, presión atmosférica y altitud mediante gráficas dinámicas optimizadas (Chart.js) que procesan las últimas *N* muestras de datos.
-* **Control Remoto y Navegación (Leaflet):** 
-  * **Modo Manual:** Control del vehículo en tiempo real mediante teclado (W,A,S,D) o controles táctiles.
-  * **Modo Autónomo:** Trazado de rutas y selección de destino directamente sobre un mapa interactivo, con cálculo de distancia y tiempo estimado (Fórmula de Haversine).
-* **Gestión de Roles y Privilegios:**
-  * **Usuarios:** Acceso de solo lectura a la telemetría y ubicación, con capacidad de enviar comandos únicamente si el hardware del robot reporta estar activo.
-  * **Administradores:** Control total sin restricciones y acceso al modo de pruebas (*dry-run*) para simulación de comandos sin conexión del hardware. Asignación de rol estricta desde base de datos.
-* **Base de Datos y Auditoría:** Almacenamiento persistente del historial de telemetría con interfaz de consulta paginada, capacidades de búsqueda y exportación local (CSV / JSON).
-* **Arquitectura Segura:** Gestión de sesiones persistentes en MongoDB, contraseñas encriptadas (bcryptjs) y blindaje de cabeceras HTTP (Helmet), con configuración `trust proxy` lista para balanceadores de carga en la nube.
+* **Telemetría en Tiempo Real:** Visualización dinámica de datos del entorno (presión atmosférica, temperatura, altitud y coordenadas GPS) utilizando gráficas dinámicas.
+* **Modos de Conducción:**
+  * **Manual:** Control directo del robot mediante un joystick virtual o el teclado (W, A, S, D).
+  * **Autónomo:** Planificación de rutas y selección de destinos directamente sobre un mapa interactivo (Leaflet).
+* **Control de Acceso (RBAC):** Sistema de autenticación seguro. Los Administradores tienen acceso a herramientas de prueba (incluso con el robot desconectado), mientras que los Usuarios estándar solo pueden operar el vehículo cuando este transmite conexión activa.
+* **Auditoría y Registros:** Almacenamiento histórico de toda la telemetría en base de datos con una tabla paginada y capacidad de búsqueda.
 
-## Stack Tecnológico
+## 🛠️ Tecnologías y Arquitectura
 
-* **Backend:** Node.js 24, Express, Mongoose (MongoDB)
-* **Comunicaciones:** MQTT (HiveMQ), Socket.IO (WebSockets bidireccionales)
-* **Seguridad y Entorno:** `@dotenvx/dotenvx`, `express-session`, `express-validator`
-* **Frontend:** HTML5, CSS3 (Variables y Flexbox/Grid), Vanilla JavaScript (Arquitectura modular)
-* **Librerías Cliente:** Leaflet (Mapas), Chart.js (Gráficas), SweetAlert2 (Alertas modales)
+El proyecto está construido bajo una arquitectura cliente-servidor renderizada desde el backend, optimizada para un bajo consumo de recursos:
 
-## Requisitos Previos
+**Back-end:**
+* **Entorno:** Node.js (v24) + Express.js
+* **Base de Datos:** MongoDB (Mongoose + connect-mongo para sesiones persistentes)
+* **Comunicaciones:** MQTT.js (recepción LoRa/Gateway) y Socket.IO (interactividad bidireccional)
+* **Seguridad:** Helmet (CSP estricto), bcryptjs, express-validator
+* **Gestión de Entorno:** @dotenvx/dotenvx (variables de entorno cifradas)
 
-* **Node.js** (v24 o superior)
-* **MongoDB** (Instancia local o Atlas)
-* **Broker MQTT** (Ej. HiveMQ)
+**Front-end:**
+* **Estructura:** HTML5 y CSS3 (Vanilla, diseño responsivo y optimizado)
+* **Librerías externas (vía CDN):** Chart.js (gráficas), Leaflet (mapas cartográficos), SweetAlert2 (modales).
 
-## Configuración y Variables de Entorno
+## 🚀 Requisitos Previos
 
-El proyecto utiliza `@dotenvx/dotenvx` para el manejo seguro y cifrado de variables de entorno. Crea un archivo `.env` en la raíz (o utiliza tu `.env` encriptado con `.env.keys`):
+* **Node.js** v24 o superior.
+* Instancia de **MongoDB** (local o Atlas).
+* Un **Broker MQTT** (ej. HiveMQ, Mosquitto).
+
+## ⚙️ Instalación y Ejecución Local
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone [https://github.com/tu-usuario/Smart_Car_Explorer_Website.git](https://github.com/tu-usuario/Smart_Car_Explorer_Website.git)
+   cd Smart_Car_Explorer_Website
